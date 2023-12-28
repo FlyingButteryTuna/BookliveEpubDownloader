@@ -32,7 +32,7 @@ def generate_key(book_cid):
     return key
 
 
-def _get_seed(input_str):
+def get_seed(input_str):
     seed = 0
     length = len(input_str)
 
@@ -47,7 +47,7 @@ def _get_seed(input_str):
     return seed
 
 
-def _get_array(input_str, seed):
+def get_array(input_str, seed):
     out_str = ''
     lfsr = seed
     length = len(input_str)
@@ -77,10 +77,5 @@ def _get_unicode_decimal(char, arr1, arr2):
     return unicode_decimal
 
 
-def deobfuscate_char(char, content_info_json):
-    items = content_info_json['items'][0]
-    seed = _get_seed(items['ContentID'] + ":" + items['key'])
-    arr1 = _get_array(items['stbl'], seed)
-    arr2 = _get_array(items['ttbl'], seed)
-
+def deobfuscate_char(char, arr1, arr2):
     return chr(_get_unicode_decimal(char, arr1, arr2))

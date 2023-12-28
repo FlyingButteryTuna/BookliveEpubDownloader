@@ -21,7 +21,7 @@ def get_content_info(session, cid):
 
     if response.status_code == 200:
         result_json = response.json()
-        result_json['items'][0]['key'] = key
+        result_json['items'][0]['seed'] = deofuscation_helpers.get_seed(cid + ":" + key)
         return result_json
     else:
         print(f'Failed to fetch content info with status code: {response.status_code}')
