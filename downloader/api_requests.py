@@ -1,7 +1,8 @@
 import time
 import re
+import urllib
 from urllib.parse import urlencode
-from downloader import deofuscation_helpers
+from downloader import deofuscator_helpers
 
 _headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
@@ -78,3 +79,17 @@ def login(session, email, password):
         print("We've logged in hehe")
     else:
         print("Incorrect credentials?")
+
+
+def get_img(session, cid, src, p, content_date):
+    base_api_link = 'https://binb.booklive.jp/bib-deliv/'
+
+    url = f'{base_api_link}sbcGetImg.php?cid={cid}&src={src}&p={p}&dmytime={content_date}'
+
+    response = session.get(url, headers=_headers)
+
+    if response.status_code == 200:
+        return response.content
+    else:
+        print(f'Failed to fetch img with status code: {response.status_code}')
+        return None
