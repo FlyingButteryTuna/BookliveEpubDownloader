@@ -2,27 +2,27 @@ import re
 import cv2
 import numpy as np
 
-tnp_constants = [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-                 -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 62, -1, -1, 52, 53, 54, 55, 56, 57,
-                 58, 59, 60, 61, -1, -1, -1, -1, -1, -1, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18,
-                 19, 20, 21, 22, 23, 24, 25, -1, -1, -1, -1, 63, -1, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39,
-                 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, -1, -1, -1, -1, -1];
+tnp_constants = [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+                 -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 62, -1, -1, 52, 53, 54, 55,
+                 56, 57, 58, 59, 60, 61, -1, -1, -1, -1, -1, -1, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,
+                 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, -1, -1, -1, -1, 63, -1, 26, 27, 28, 29, 30, 31, 32, 33, 34,
+                 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, -1, -1, -1, -1, -1]
 
 
-def cp_index(fName):
+def cp_index(f_name):
     c = 0
     p = 0
 
-    if fName is not None and fName != "":
-        startPos = fName.rfind('/') + 1
-        length = len(fName) - startPos
+    if f_name is not None and f_name != "":
+        start_pos = f_name.rfind('/') + 1
+        length = len(f_name) - start_pos
 
         if length > 0:
             for i in range(length):
                 if i % 2 == 0:
-                    p += ord(fName[i + startPos])
+                    p += ord(f_name[i + start_pos])
                 else:
-                    c += ord(fName[i + startPos])
+                    c += ord(f_name[i + start_pos])
 
             p %= 8
             c %= 8
@@ -73,13 +73,13 @@ class DescrabmlerType1:
         image_array = np.frombuffer(img_request, dtype=np.uint8)
         self.img = cv2.imdecode(image_array, cv2.IMREAD_COLOR)
 
-    def is_valid_size(self, width, height):
+    def is_scrambled(self, width, height):
         aw = self.h * 2 * self.padding
         ah = self.v * 2 * self.padding
         return width >= 64 + aw and height >= 64 + ah and width * height >= (320 + aw) * (320 + ah)
 
     def calculate_size(self, width, height):
-        if not self.is_valid_size(width, height):
+        if not self.is_scrambled(width, height):
             return {"width": width, "height": height}
 
         return {
@@ -149,28 +149,26 @@ class DescrabmlerType1:
 def get_descrabmler(ctbl, ptbl, f_name, img):
     if ctbl[0] == "=" and ptbl[0] == "=":
         return DescrabmlerType1(ctbl, ptbl, f_name, img)
-    #elif stbl[0].isdigit() and dtbl[0].isdigit():
+    # elif stbl[0].isdigit() and dtbl[0].isdigit():
     #    return Z1Z2CQ(stbl, dtbl)
-    #elif stbl == "" and dtbl == "":
+    # elif stbl == "" and dtbl == "":
     #    return ZVA2CM()
     return None
 
 
-def desc_img(img, ctbl, ptbl):
-    tIdx = ZIX04A(img.ZKV1AZ)
-    descrambler = get_descrabmler(ctbl[tIdx["c"]], ptbl[tIdx["p"]])
-
-    if descrambler.is_valid_size(img.width, img.height):
-        descsize = descrambler.calculate_size(img.width, img.height)
-        img.orgWidth = descsize["width"]
-        img.orgHeight = descsize["height"]
-        img.descramblekeys = {"c": ctbl[tIdx["c"]], "p": ctbl[tIdx["p"]]}
-    else:
-        img.orgWidth = img.width
-        img.orgHeight = img.height
-        img.descramblekeys = None
-
-    del tIdx
-    del descrambler
-
-
+# def desc_img(img, ctbl, ptbl):
+#     tIdx = ZIX04A(img.ZKV1AZ)
+#     descrambler = get_descrabmler(ctbl[tIdx["c"]], ptbl[tIdx["p"]])
+#
+#     if descrambler.is_valid_size(img.width, img.height):
+#         descsize = descrambler.calculate_size(img.width, img.height)
+#         img.orgWidth = descsize["width"]
+#         img.orgHeight = descsize["height"]
+#         img.descramblekeys = {"c": ctbl[tIdx["c"]], "p": ctbl[tIdx["p"]]}
+#     else:
+#         img.orgWidth = img.width
+#         img.orgHeight = img.height
+#         img.descramblekeys = None
+#
+#     del tIdx
+#     del descrambler

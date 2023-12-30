@@ -1,6 +1,5 @@
 import time
 import re
-import urllib
 from urllib.parse import urlencode
 from downloader import deofuscator_helpers
 
@@ -14,7 +13,7 @@ _headers = {
 def get_content_info(session, cid):
     base_api_link = 'https://booklive.jp/bib-api/'
     timestamp = str(int(time.time()))
-    key = deofuscation_helpers.generate_key(cid)
+    key = deofuscator_helpers.generate_key(cid)
 
     url = f'{base_api_link}bibGetCntntInfo?cid={cid}&k={key}&dmytime={timestamp}'
 
@@ -22,7 +21,7 @@ def get_content_info(session, cid):
 
     if response.status_code == 200:
         result_json = response.json()
-        result_json['items'][0]['seed'] = deofuscation_helpers.get_seed(cid + ":" + key)
+        result_json['items'][0]['seed'] = deofuscator_helpers.get_seed(cid + ":" + key)
         return result_json
     else:
         print(f'Failed to fetch content info with status code: {response.status_code}')
@@ -73,7 +72,7 @@ def login(session, email, password):
     headers = _headers
     headers['Content-Type'] = 'application/x-www-form-urlencoded'
 
-    response = session.post(login_page + "/index", headers=headers, data=payload)
+    session.post(login_page + "/index", headers=headers, data=payload)
 
     if 'BL_LI' in session.cookies:
         print("We've logged in hehe")
