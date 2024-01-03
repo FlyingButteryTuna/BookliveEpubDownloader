@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ncx xmlns="http://www.daisy.org/z3986/2005/ncx/" version="2005-1">
+  <head>
+    <meta name="dtb:uid" content="B00QWGZ4T8" />
+    <meta name="dtb:depth" content="1" />
+    <meta name="dtb:totalPageCount" content="0" />
+    <meta name="dtb:maxPageNumber" content="0" />
+  </head>
+<docTitle>
+  <text>ねじ巻き精霊戦記 天鏡のアルデラミン</text>
+</docTitle>
+<navMap>
+<navPoint id="navPoint-1" playOrder="1">
+	<navLabel><text>contents</text></navLabel>
+	<content src="Text/p-toc-001.xhtml" />
+</navPoint>
+<navPoint id="navPoint-2" playOrder="2">
+	<navLabel><text>第一章　たそがれの帝国にて</text></navLabel>
+	<content src="Text/p-002.xhtml#toc-001" />
+</navPoint>
+<navPoint id="navPoint-3" playOrder="3">
+	<navLabel><text>第二章　東部戦線異状なし</text></navLabel>
+	<content src="Text/p-004.xhtml#toc-002" />
+</navPoint>
+<navPoint id="navPoint-4" playOrder="4">
+	<navLabel><text>第三章　永霊樹の番犬たち</text></navLabel>
+	<content src="Text/p-007.xhtml#toc-003" />
+</navPoint>
+<navPoint id="navPoint-5" playOrder="5">
+	<navLabel><text>第四章　イクタ・ソロークの怠性科学</text></navLabel>
+	<content src="Text/p-009.xhtml#toc-004" />
+</navPoint>
+<navPoint id="navPoint-6" playOrder="6">
+	<navLabel><text>エピローグ</text></navLabel>
+	<content src="Text/p-012.xhtml#toc-005" />
+</navPoint>
+<navPoint id="navPoint-7" playOrder="7">
+	<navLabel><text>あとがき</text></navLabel>
+	<content src="Text/p-013.xhtml#toc-006" />
+</navPoint>
+<navPoint id="navPoint-8" playOrder="8">
+	<navLabel><text>奥付</text></navLabel>
+	<content src="Text/p-colophon.xhtml" />
+</navPoint>
+
+</navMap>
+</ncx>

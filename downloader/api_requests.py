@@ -38,7 +38,8 @@ def get_content(session, cid, p, suid, content_date):
     response = session.get(url, headers=_headers)
 
     if response.status_code == 200:
-        return response.text
+
+        return response.text[7:-1]
     else:
         print(f'Failed to fetch content with status code: {response.status_code}')
         return None

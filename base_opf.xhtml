@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package
+ xmlns="http://www.idpf.org/2007/opf"
+ version="3.0"
+ xml:lang="ja"
+ unique-identifier="bl-id"
+ prefix="rendition: http://www.idpf.org/vocab/rendition/#
+         ebpaj: http://www.ebpaj.jp/
+         fixed-layout-jp: http://www.digital-comic.jp/
+         kadokawa: http://www.kadokawa.co.jp/
+         access: http://www.access-company.com/2012/layout#
+         ibooks: http://vocabulary.itunes.apple.com/rdf/ibooks/vocabulary-extensions-1.0/"
+>
+
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<!-- 言語 -->
+<dc:language>ja</dc:language>
+
+<!-- etc. -->
+<meta property="ebpaj:guide-version">1.1.3</meta>
+<meta property="kadokawa:version">1.1.3</meta>
+<meta property="kadokawa:reflow">1.1.0</meta>
+<meta property="ibooks:specified-fonts">true</meta>
+
+<!-- リフロー型制作仕様（KADOKAWA） ver.1.1.0 -->
+
+</metadata>
+
+<manifest>
+
+<!-- navigation -->
+<item media-type="application/xhtml+xml" id="toc" href="navigation-documents.xhtml" properties="nav"/>
+
+<!-- style -->
+<item media-type="text/css" id="book-style"     href="style/book-style.css"/>
+<item media-type="text/css" id="style-reset"    href="style/style-reset.css"/>
+<item media-type="text/css" id="style-standard" href="style/style-standard.css"/>
+<item media-type="text/css" id="style-advance"  href="style/style-advance.css"/>
+<item media-type="text/css" id="style-check"    href="style/style-check.css"/>
+<item media-type="text/css" id="style-bc-amw"   href="style/style-bc-amw.css"/>
+<item media-type="text/css" id="style-karc"     href="style/style-karc.css"/>
+<item media-type="text/css" id="generated_styles"     href="style/generated_styles.css"/>
+
+</manifest>
+
+<spine page-progression-direction="rtl">
+
+</spine>
+
+</package>

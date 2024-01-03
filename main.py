@@ -2,6 +2,7 @@ import json
 
 import requests
 
+import epub_builder
 from downloader import deofuscator_helpers
 from downloader import api_requests
 from bs4 import BeautifulSoup
@@ -9,22 +10,36 @@ from downloader import img_descrambler
 from PIL import Image
 import cv2
 import numpy as np
+from downloader import deofuscator
 
-# session = requests.Session()
-# api_requests.login(session, 'miller.tanaka@yandex.ru', '10012001f')
+
+session = requests.Session()
+cid = '60005391_001'
+api_requests.login(session, 'miller.tanaka@yandex.ru', '10012001f')
+
+content_info_json = api_requests.get_content_info(session, cid)
+arrays = [deofuscator_helpers.get_array(content_info_json['items'][0]['stbl'], content_info_json['items'][0]['seed']),
+         deofuscator_helpers.get_array(content_info_json['items'][0]['ttbl'], content_info_json['items'][0]['seed'])]
+
+content = api_requests.get_content(session, cid,
+                              content_info_json['items'][0]['p'],
+                              content_info_json['ShopUserID'],
+                              content_info_json['items'][0]['ContentDate'])
+
+content = json.loads(content)
+
+content = deofuscator.process_html(content['ttx'], content_info_json)
+
+epub_builder.construct_epub(session, content, content_info_json)
+
+# soup = BeautifulSoup(content, 'html.parser')
 #
-# content_info_json = api_requests.get_content_info(session, "13400_001")
-# arrays = [deofuscator_helpers.get_array(content_info_json['items'][0]['stbl'], content_info_json['items'][0]['seed']),
-#          deofuscator_helpers.get_array(content_info_json['items'][0]['ttbl'], content_info_json['items'][0]['seed'])]
+# with open('index2.xhtml', 'w', encoding='utf-8') as output_file:
+#     output_file.write(content)
 #
-# print(content_info_json)
 #
-# print(deofuscator_helpers.deobfuscate_char("4fwu8", arrays[0], arrays[1]))
-#
-# print(api_requests.get_content(session, "60005391_001",
-#                               content_info_json['items'][0]['p'],
-#                               content_info_json['ShopUserID'],
-#                               content_info_json['items'][0]['ContentDate']))
+# with open('gakuentoshi2.xhtml', 'w', encoding='utf-8') as output_file:
+#     output_file.write(soup.prettify())
 
 # ctbl = deofuscator_helpers.get_array(content_info_json['items'][0]['ctbl'], content_info_json['items'][0]['seed'])
 # ptbl = deofuscator_helpers.get_array(content_info_json['items'][0]['ptbl'], content_info_json['items'][0]['seed'])

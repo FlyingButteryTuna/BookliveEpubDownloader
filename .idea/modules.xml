@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/BookliveEpubDownloader.iml" filepath="$PROJECT_DIR$/.idea/BookliveEpubDownloader.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/booklive.iml" filepath="$PROJECT_DIR$/.idea/booklive.iml" />
     </modules>
   </component>
 </project>

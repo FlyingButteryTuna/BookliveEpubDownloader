@@ -72,19 +72,22 @@ class DescrabmlerType1:
 
         image_array = np.frombuffer(img_request, dtype=np.uint8)
         self.img = cv2.imdecode(image_array, cv2.IMREAD_COLOR)
+        original_height, original_width, _ = self.img.shape
+        self.width = original_width
+        self.height = original_height
 
-    def is_scrambled(self, width, height):
+    def is_scrambled(self):
         aw = self.h * 2 * self.padding
         ah = self.v * 2 * self.padding
-        return width >= 64 + aw and height >= 64 + ah and width * height >= (320 + aw) * (320 + ah)
+        return self.width >= 64 + aw and self.height >= 64 + ah and self.width * self.height >= (320 + aw) * (320 + ah)
 
-    def calculate_size(self, width, height):
-        if not self.is_scrambled(width, height):
-            return {"width": width, "height": height}
+    def calculate_size(self):
+        if not self.is_scrambled():
+            return {"width": self.width, "height": self.height}
 
         return {
-            "width": width - self.h * 2 * self.padding,
-            "height": height - self.v * 2 * self.padding
+            "width": self.width - self.h * 2 * self.padding,
+            "height": self.height - self.v * 2 * self.padding
         }
 
     def tnp(self, input_str):
@@ -94,7 +97,7 @@ class DescrabmlerType1:
 
         return {"t": t, "n": n, "p": p}
 
-    def calculate_coords(self, width, height):
+    def calculate_coords(self):
         if self.p is None:
             s = self.tnp(self.s_str)
             d = self.tnp(self.d_str)
@@ -106,8 +109,8 @@ class DescrabmlerType1:
             del s
             del d
 
-        w = width - self.h * 2 * self.padding
-        h = height - self.v * 2 * self.padding
+        w = self.width - self.h * 2 * self.padding
+        h = self.height - self.v * 2 * self.padding
         ww = (w + self.h - 1) // self.h
         nw = w - (self.h - 1) * ww
         hh = (h + self.v - 1) // self.v
@@ -132,14 +135,14 @@ class DescrabmlerType1:
         return coords
 
     def descrabmble_img(self):
-        original_height, original_width, _ = self.img.shape
-        rectangles = self.calculate_coords(original_width, original_height)
-        true_size = self.calculate_size(original_width, original_height)
+        if not self.is_scrambled():
+            return self.img
+        rectangles = self.calculate_coords()
+        true_size = self.calculate_size()
 
         blank_image = 255 * np.ones((true_size['height'], true_size['width'], 3), dtype=np.uint8)
 
         for rect in rectangles:
-            print(rect)
             piece = self.img[rect['sy']:rect['sy'] + rect['h'], rect['sx']:rect['sx'] + rect['w']].copy()
             blank_image[rect['dy']:rect['dy'] + rect['h'], rect['dx']:rect['dx'] + rect['w']] = piece
 
