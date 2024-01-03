@@ -120,6 +120,20 @@ def handle_border_before_color(parent_t_pb, value):
     return chosen_attr, value
 
 
+def handle_border_start_color(parent_t_pb, value):
+    horizontal_attr = 'border-left-color'
+    vertical_attr = 'border-top-color'
+    chosen_attr = check_stroke(parent_t_pb, horizontal_attr, vertical_attr)
+    return chosen_attr, value
+
+
+def handle_border_end_color(parent_t_pb, value):
+    horizontal_attr = 'border-right-color'
+    vertical_attr = 'border-bottom-color'
+    chosen_attr = check_stroke(parent_t_pb, horizontal_attr, vertical_attr)
+    return chosen_attr, value
+
+
 def handle_border_after_style(parent_t_pb, value):
     horizontal_attr = 'border-bottom-style'
     vertical_attr = 'border-left-style'
@@ -134,6 +148,20 @@ def handle_border_before_style(parent_t_pb, value):
     return chosen_attr, value
 
 
+def handle_border_start_style(parent_t_pb, value):
+    horizontal_attr = 'border-left-style'
+    vertical_attr = 'border-top-style'
+    chosen_attr = check_stroke(parent_t_pb, horizontal_attr, vertical_attr)
+    return chosen_attr, value
+
+
+def handle_border_end_style(parent_t_pb, value):
+    horizontal_attr = 'border-right-style'
+    vertical_attr = 'border-bottom-style'
+    chosen_attr = check_stroke(parent_t_pb, horizontal_attr, vertical_attr)
+    return chosen_attr, value
+
+
 def handle_border_after_width(parent_t_pb, value):
     horizontal_attr = 'border-bottom-width'
     vertical_attr = 'border-left-width'
@@ -144,6 +172,20 @@ def handle_border_after_width(parent_t_pb, value):
 def handle_border_before_width(parent_t_pb, value):
     horizontal_attr = 'border-top-width'
     vertical_attr = 'border-right-width'
+    chosen_attr = check_stroke(parent_t_pb, horizontal_attr, vertical_attr)
+    return chosen_attr, value + "px"
+
+
+def handle_border_start_width(parent_t_pb, value):
+    horizontal_attr = 'border-left-width'
+    vertical_attr = 'border-top-width'
+    chosen_attr = check_stroke(parent_t_pb, horizontal_attr, vertical_attr)
+    return chosen_attr, value + "px"
+
+
+def handle_border_end_width(parent_t_pb, value):
+    horizontal_attr = 'border-right-width'
+    vertical_attr = 'border-bottom-width'
     chosen_attr = check_stroke(parent_t_pb, horizontal_attr, vertical_attr)
     return chosen_attr, value + "px"
 
@@ -265,7 +307,7 @@ def handle_text_orientation(parent_t_pb, value):
 
 
 def handle_face(parent_t_pb, value):
-    return 'font-family', value
+    return 'font-family', value[1:-1]
 
 
 def handle_weight(parent_t_pb, value):
@@ -274,3 +316,7 @@ def handle_weight(parent_t_pb, value):
 
 def handle_charspace(parent_t_pb, value):
     return 'letter-spacing', value
+
+
+def handle_length(parent_t_pb, value):
+    return 'width', value

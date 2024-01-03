@@ -21,17 +21,25 @@ tag_handlers = {
     'border-before-style': tag_converter_helpers.handle_border_before_style,
     'border-after-width': tag_converter_helpers.handle_border_after_width,
     'border-before-width': tag_converter_helpers.handle_border_before_width,
+    'border-start-color': tag_converter_helpers.handle_border_start_color,
+    'border-end-color': tag_converter_helpers.handle_border_end_color,
+    'border-start-style': tag_converter_helpers.handle_border_start_style,
+    'border-end-style': tag_converter_helpers.handle_border_end_style,
+    'border-start-width': tag_converter_helpers.handle_border_start_width,
+    'border-end-width': tag_converter_helpers.handle_border_end_width,
     'face': tag_converter_helpers.handle_face,
     'text-ori': tag_converter_helpers.handle_text_orientation,
     'weight': tag_converter_helpers.handle_weight,
     'charspace': tag_converter_helpers.handle_charspace,
-    't-code': tag_converter_helpers.handle_tcode
+    't-code': tag_converter_helpers.handle_tcode,
+    'length': tag_converter_helpers.handle_length
 }
 
 styles_to_delete = [
     'honmonface',
     'honmonsize',
     'link',
+    'bgcolor'
 ]
 
 styles_to_skip = [
@@ -63,13 +71,17 @@ props_to_skip = [
     'mheight',
     'mwidth',
     'style',
-    'class'
+    'class',
+    'alt',  # todo gaiji alt (e.g. overlord vol1)
+    'fontclear',  # todo idk what this is lol arifureta vol1
+    'height'
 ]
 
 props_to_keep = [
     'src',
     'class',
-    'stroke'
+    'stroke',
+    'height',
 ]
 
 tags_to_skip = [
@@ -208,6 +220,9 @@ def generate_css_classes(html_content):
                         tag[prop] += tag_properties[prop]
                     else:
                         tag[prop] = tag_properties[prop]
+
+            if tag.name == 't-pb':
+                tag['valign'] = tag_properties['valign']
 
 
         new_html = soup

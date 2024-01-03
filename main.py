@@ -14,7 +14,7 @@ from downloader import deofuscator
 
 
 session = requests.Session()
-cid = '60005391_001'
+cid = '149603_001'
 api_requests.login(session, 'miller.tanaka@yandex.ru', '10012001f')
 
 content_info_json = api_requests.get_content_info(session, cid)
@@ -28,8 +28,12 @@ content = api_requests.get_content(session, cid,
 
 content = json.loads(content)
 
-content = deofuscator.process_html(content['ttx'], content_info_json)
 
+
+content = deofuscator.process_html(content['ttx'], content_info_json)
+with open('arifureta.html', 'w', encoding='utf-8') as file:
+    soup = BeautifulSoup(content, 'html.parser')
+    file.write(soup.prettify())
 epub_builder.construct_epub(session, content, content_info_json)
 
 # soup = BeautifulSoup(content, 'html.parser')

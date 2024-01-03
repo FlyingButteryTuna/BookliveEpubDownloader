@@ -105,13 +105,19 @@ def handle_pages_text(soup, name, t_pb, title, epub_folder):
     page_type = get_page_type(name)
 
     base = get_base_xhtml([stroke], title, [page_type], ['main'])
-    del t_pb['stroke']
     t_pb.name = 'div'
     main_div = base.find('div')
+    if t_pb.attrs.get('stroke') is None:
+        print()
+    if t_pb['valign'] == 'middle' and t_pb['stroke'] == 'vertical':
+        base.find('html')['class'] = ['hltr']
+        base.find('body').find('div')['class'] += ['vrtl', 'block-align-center']
+
+    del t_pb['stroke']
+
     main_div.append(t_pb)
     with open(epub_folder + '/item/xhtml/' + name, 'w', encoding='utf-8') as page_file:
         page_file.write(str(base))
-
 
 
 def clone(el):
@@ -140,6 +146,8 @@ def set_toc_mapping(soup):
     for a in body.find_all('a', href=True):
         href = a.get('href')
         file_name = [fn for fn in list(xhtml_files_mapping.keys()) if href[1:].split('_')[0] in xhtml_files_mapping[fn]]
+        if len(file_name) == 0:
+            continue
         if 'xhtml' not in href:
             a['href'] = file_name[0] + href
         else:
@@ -153,7 +161,6 @@ def build_pages(soup, title, epub_folder):
         set_toc_mapping(soup)
 
     xhtml_files = []
-    xhtml_files_mapping = {}
     name, name_converted = handle_cover(soup, title, epub_folder)
     xhtml_files.append(name_converted)
 
