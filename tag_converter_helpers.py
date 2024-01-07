@@ -1,6 +1,6 @@
 import random
 import string
-
+from bs4 import NavigableString
 
 def replace_after_before_value(value):
     if value != 'auto' and value != '0':
@@ -198,7 +198,16 @@ def handle_img(soup):
             'src': src,
             'class': ['fit']
         }
+        if tag.has_attr('chars'):
+            attrs['height'] = tag['chars'] + 'em'
+        if tag.has_attr('line'):
+            attrs['class'] += ['gaiji-line']
+
         new_tag.attrs = attrs
+
+        text = tag.text
+        if text:
+            tag.insert_after(NavigableString(text))
         tag.replace_with(new_tag)
 
 
@@ -218,8 +227,11 @@ def handle_trb(soup):
 
         text = custom_tag.text.strip()
         split_pos = text.find('（')
+        if split_pos == 0:
+            ruby_tag.append(custom_tag.contents[0])
+        else:
+            ruby_tag.append(text[0:split_pos].strip())
 
-        ruby_tag.append(text[0:split_pos].strip())
         rt_text = text[split_pos:].split('（')[1].split('）')[0]
         rt_tag.append(rt_text.strip())
 
@@ -293,11 +305,13 @@ def handle_tcode(soup):
     for tcode_tag in soup.find_all('t-code'):
         span_tag = soup.new_tag('span')
         img_tag = soup.new_tag('img')
+        src = '../' + tcode_tag.attrs['src'].replace('img', 'image')
 
-        img_tag['src'] = tcode_tag['src']
+        img_tag['src'] = src
         img_tag['class'] = ['gaiji']
 
         span_tag.append(img_tag)
+        tcode_tag.find_parent().extend(tcode_tag.contents)
         tcode_tag.replace_with(span_tag)
 
 

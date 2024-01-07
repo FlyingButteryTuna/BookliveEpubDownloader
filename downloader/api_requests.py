@@ -2,6 +2,7 @@ import time
 import re
 from urllib.parse import urlencode
 from downloader import deofuscator_helpers
+import json
 
 _headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
@@ -90,6 +91,24 @@ def get_img(session, cid, src, p, content_date):
 
     if response.status_code == 200:
         return response.content
+    else:
+        print(f'Failed to fetch img with status code: {response.status_code}')
+        return None
+
+
+def get_img_b64(session, cid, src, p, content_date):
+    base_api_link = 'https://binb.booklive.jp/bib-deliv/'
+    callback_method = 'Z46004'
+    w = '128'
+    h = '128'
+
+    url = (f'{base_api_link}sbcGetImgB64.php?callback={callback_method}&cid={cid}&src={src}&p={p}&'
+           f'w={w}&h={h}&dmytime={content_date}')
+
+    response = session.get(url, headers=_headers)
+
+    if response.status_code == 200:
+        return json.loads(response.text[7:-1])
     else:
         print(f'Failed to fetch img with status code: {response.status_code}')
         return None

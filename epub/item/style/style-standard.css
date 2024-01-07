@@ -195,6 +195,7 @@ html {
 .hltr .block-align-start  { margin: 0 auto 0 0; }
 .hltr .block-align-center { margin: 0 auto;     }
 .hltr .block-align-end    { margin: 0 0 0 auto; }
+.hltr .block-align-center-vert { margin: 0 auto; height: 100%; }
 
 /* 縦組み用 */
 .vrtl .block-align-start  { margin: 0 0 auto 0; }

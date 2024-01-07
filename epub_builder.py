@@ -11,6 +11,9 @@ from downloader import deofuscator_helpers
 from downloader import api_requests
 import cv2
 import os
+from io import BytesIO
+import base64
+from PIL import Image
 
 
 def remove_tag_without_attributes_or_children(soup, tag_name):
@@ -109,9 +112,11 @@ def handle_pages_text(soup, name, t_pb, title, epub_folder):
     main_div = base.find('div')
     if t_pb.attrs.get('stroke') is None:
         print()
-    if t_pb['valign'] == 'middle' and t_pb['stroke'] == 'vertical':
+    if t_pb['valign'] == 'middle':
         base.find('html')['class'] = ['hltr']
-        base.find('body').find('div')['class'] += ['vrtl', 'block-align-center']
+        base.find('body').find('div')['class'][0] = 'p-text'
+        base.find('body').find('div')['class'] += ['vrtl', 'block-align-center-vert']
+
 
     del t_pb['stroke']
 
@@ -143,7 +148,7 @@ def set_toc_mapping(soup):
         converted_name = convert_name(a_file_name['name'])
         xhtml_files_mapping[converted_name] = a_file_name['name']
 
-    for a in body.find_all('a', href=True):
+    for a in soup.find_all('a', href=True):
         href = a.get('href')
         file_name = [fn for fn in list(xhtml_files_mapping.keys()) if href[1:].split('_')[0] in xhtml_files_mapping[fn]]
         if len(file_name) == 0:
@@ -198,12 +203,19 @@ def download_images(soup, content_info_json, session, epub_folder):
     for img in soup.find_all('img'):
         file_name = os.path.basename(img['src'])
         path = f'img/{file_name}'
+        output = str(os.path.join(epub_folder + '/item/image', file_name))
+        if 'gaiji' in img['class'] or 'gaiji' == img['class']:
+            img_data = api_requests.get_img_b64(session, items['ContentID'], path, items['p'], items['ContentDate'])
+            img_data = img_data['Data'].split(',')[1]
+            image_binary = base64.b64decode(img_data)
+            image = Image.open(BytesIO(image_binary))
+            image.save(output)
 
-        img = api_requests.get_img(session, items['ContentID'], path, items['p'], items['ContentDate'])
-
-        desc = img_descrambler.DescrabmlerType1(ctbl, ptbl, path, img)
-        blank_image = desc.descrabmble_img()
-        cv2.imwrite(str(os.path.join(epub_folder + '/item/image', file_name)), blank_image)
+        else:
+            img = api_requests.get_img(session, items['ContentID'], path, items['p'], items['ContentDate'])
+            desc = img_descrambler.DescrabmlerType1(ctbl, ptbl, path, img)
+            blank_image = desc.descrabmble_img()
+            cv2.imwrite(output, blank_image)
 
 
 def build_opf(content_info_json, epub_folder, xhtml_files):
@@ -235,6 +247,85 @@ def build_opf(content_info_json, epub_folder, xhtml_files):
         standard_file.write(str(base_opf))
 
 
+def choose_file_from_directory(custom_string, directory_path):
+    # Print the custom string
+    print(custom_string)
+
+    # List all files in the specified directory
+    files = os.listdir(directory_path)
+
+    # Print the files with corresponding indices
+    for i, file_name in enumerate(files, 1):
+        print(f"{i}. {file_name}")
+
+    # Ask the user to choose a directory
+    try:
+        user_choice = int(input("Enter the number of the file: "))
+        if 1 <= user_choice <= len(files):
+            # Return the full path of the selected file
+            return os.path.join(directory_path, files[user_choice - 1])
+        else:
+            print("Invalid choice. Please enter a valid number.")
+    except ValueError:
+        print("Invalid input. Please enter a number.")
+
+
+def build_navigation_documents(soup, epub_folder):
+    with open('nav-doc_base.xhtml') as nav_doc_base:
+        base_nav_doc = nav_doc_base.read()
+
+    base_nav_doc = BeautifulSoup(base_nav_doc, 'html.parser')
+
+    lists = base_nav_doc.find_all('ol')
+    contents = soup.find('t-contents')
+    for tag in contents.find_all('a'):
+        li_tag = soup.new_tag('li')
+        li_tag.append(tag)
+        lists[0].append(li_tag)
+
+    cover = choose_file_from_directory('Choose cover', epub_folder + '/item/xhtml')
+    honpen = choose_file_from_directory('Choose text start', epub_folder + '/item/xhtml')
+    toc = choose_file_from_directory('Choose TOC', epub_folder + '/item/xhtml')
+
+    li_cover = soup.new_tag('li')
+    a_cover = soup.new_tag('a')
+    a_cover['epub:type'] = 'cover'
+    a_cover['href'] = cover
+    li_cover.append(a_cover)
+    lists[1].append(li_cover)
+
+    li_text = soup.new_tag('li')
+    a_text = soup.new_tag('a')
+    a_text['epub:type'] = 'text'
+    a_text['href'] = honpen
+    li_text.append(a_text)
+    lists[1].append(li_text)
+
+    li_toc = soup.new_tag('li')
+    a_toc = soup.new_tag('a')
+    a_toc['epub:type'] = 'toc'
+    a_toc['href'] = toc
+    li_toc.append(a_toc)
+    lists[1].append(li_toc)
+    with open(epub_folder + '/item/' + 'navigation-documents.xhtml', 'w', encoding='utf-8') as nav_doc:
+        nav_doc.write(str(base_nav_doc))
+
+
+def wrap_elements(html):
+    soup = BeautifulSoup(html, 'html.parser')
+    body = soup.find('body')
+
+    if body:
+        first_element = body.contents[0]
+        if first_element.name != 'div':
+            wrapper_div = soup.new_tag('div')
+            while body.contents and body.contents[0].name != 't-pb':
+                wrapper_div.append(body.contents[0].extract())
+            body.insert(0, wrapper_div)
+
+    return str(soup)
+
+
 def construct_epub(session, html_content, content_info_json):
     try:
         shutil.rmtree('epub')
@@ -246,12 +337,15 @@ def construct_epub(session, html_content, content_info_json):
     # with open('index2.xhtml', 'r', encoding='utf-8') as file:
     #     html_content = file.read()
     html_content = test.remove_t_param_tags(html_content)
+    html_content = wrap_elements(html_content)
 
     new_html = test.generate_css_classes(html_content)
 
-    xhtml_files = build_pages(new_html, 'TITLE', 'epub')
     download_images(new_html, content_info_json, session, 'epub')
+    xhtml_files = build_pages(new_html, 'TITLE', 'epub')
+
     build_opf(content_info_json, 'epub', xhtml_files)
+    build_navigation_documents(new_html, 'epub')
 
 
 

@@ -31,7 +31,6 @@ tag_handlers = {
     'text-ori': tag_converter_helpers.handle_text_orientation,
     'weight': tag_converter_helpers.handle_weight,
     'charspace': tag_converter_helpers.handle_charspace,
-    't-code': tag_converter_helpers.handle_tcode,
     'length': tag_converter_helpers.handle_length
 }
 
@@ -74,7 +73,6 @@ props_to_skip = [
     'class',
     'alt',  # todo gaiji alt (e.g. overlord vol1)
     'fontclear',  # todo idk what this is lol arifureta vol1
-    'height'
 ]
 
 props_to_keep = [
@@ -165,6 +163,7 @@ def replace_tag(parent_t_pb, attr, value):
 def replace_tags(soup):
     tag_converter_helpers.handle_img(soup)
     tag_converter_helpers.handle_tmove(soup)
+    tag_converter_helpers.handle_tcode(soup)
     tag_converter_helpers.handle_trb(soup)
     tag_converter_helpers.handle_tyoko(soup)
     tag_converter_helpers.handle_tfont(soup)
@@ -201,7 +200,8 @@ def generate_css_classes(html_content):
             if len(tag_properties) == 0:
                 continue
 
-            filtered_properties = {key: value for key, value in tag_properties.items() if key not in props_to_skip}
+            filtered_properties = {key: value for key, value in tag_properties.items()
+                                   if key not in props_to_skip or key == 'height'}
 
             properties_tuple = tuple(sorted(filtered_properties.items()))
 
