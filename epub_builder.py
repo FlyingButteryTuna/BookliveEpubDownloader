@@ -1,3 +1,5 @@
+from difflib import ndiff
+
 from bs4 import BeautifulSoup
 
 import standard_opf_helpers
@@ -217,6 +219,13 @@ def download_images(soup, content_info_json, session, epub_folder):
             blank_image = desc.descrabmble_img()
             cv2.imwrite(output, blank_image)
 
+    if items['ThumbnailImageURL']:
+        content = api_requests.get_cover(session, items['ThumbnailImageURL'])
+        image = Image.open(BytesIO(content))
+
+        output = str(os.path.join(epub_folder + '/item/image', 'cover.png'))
+        image.save(output)
+
 
 def build_opf(content_info_json, epub_folder, xhtml_files):
     with open('base_opf.xhtml') as base_opf:
@@ -263,9 +272,9 @@ def choose_file_from_directory(custom_string, directory_path):
         user_choice = int(input("Enter the number of the file: "))
         if 1 <= user_choice <= len(files):
             # Return the full path of the selected file
-            return os.path.join(directory_path, files[user_choice - 1])
+            return os.path.join("xhtml", files[user_choice - 1])
         else:
-            print("Invalid choice. Please enter a valid number.")
+            return None
     except ValueError:
         print("Invalid input. Please enter a number.")
 
@@ -280,6 +289,7 @@ def build_navigation_documents(soup, epub_folder):
     contents = soup.find('t-contents')
     for tag in contents.find_all('a'):
         li_tag = soup.new_tag('li')
+        tag['href'] = str(os.path.join('xhtml', tag['href']))
         li_tag.append(tag)
         lists[0].append(li_tag)
 
@@ -287,26 +297,30 @@ def build_navigation_documents(soup, epub_folder):
     honpen = choose_file_from_directory('Choose text start', epub_folder + '/item/xhtml')
     toc = choose_file_from_directory('Choose TOC', epub_folder + '/item/xhtml')
 
-    li_cover = soup.new_tag('li')
-    a_cover = soup.new_tag('a')
-    a_cover['epub:type'] = 'cover'
-    a_cover['href'] = cover
-    li_cover.append(a_cover)
-    lists[1].append(li_cover)
+    if cover is not None:
+        li_cover = soup.new_tag('li')
+        a_cover = soup.new_tag('a')
+        a_cover['epub:type'] = 'cover'
+        a_cover['href'] = cover
+        li_cover.append(a_cover)
+        lists[1].append(li_cover)
 
-    li_text = soup.new_tag('li')
-    a_text = soup.new_tag('a')
-    a_text['epub:type'] = 'text'
-    a_text['href'] = honpen
-    li_text.append(a_text)
-    lists[1].append(li_text)
+    if honpen is not None:
+        li_text = soup.new_tag('li')
+        a_text = soup.new_tag('a')
+        a_text['epub:type'] = 'text'
+        a_text['href'] = honpen
+        li_text.append(a_text)
+        lists[1].append(li_text)
 
-    li_toc = soup.new_tag('li')
-    a_toc = soup.new_tag('a')
-    a_toc['epub:type'] = 'toc'
-    a_toc['href'] = toc
-    li_toc.append(a_toc)
-    lists[1].append(li_toc)
+    if toc is not None:
+        li_toc = soup.new_tag('li')
+        a_toc = soup.new_tag('a')
+        a_toc['epub:type'] = 'toc'
+        a_toc['href'] = toc
+        li_toc.append(a_toc)
+        lists[1].append(li_toc)
+
     with open(epub_folder + '/item/' + 'navigation-documents.xhtml', 'w', encoding='utf-8') as nav_doc:
         nav_doc.write(str(base_nav_doc))
 
@@ -326,6 +340,47 @@ def wrap_elements(html):
     return str(soup)
 
 
+def compare_body_text_with_context(soup1, soup2, context_size=10):
+    # Find the body tags in both soups
+    body_tag1 = soup1.find('body')
+    body_tag2 = soup2.find('body')
+
+    if body_tag1 and body_tag2:
+        # Extract text from the body tags
+        text1 = body_tag1.get_text()
+        text2 = body_tag2.get_text()
+
+        # Compare the texts using difflib
+        diff = ndiff(text1, text2)
+
+        # Track the differences and surrounding context
+        differences = []
+        current_diff = []
+
+        for item in diff:
+            if item.startswith(' '):
+                # If no difference, reset the current_diff list
+                current_diff = []
+            elif item.startswith(('+', '-')):
+                # If a difference is found, append to the current_diff list
+                current_diff.append(item)
+
+                # If the current_diff list reaches the context size, append it to differences
+                if len(current_diff) == context_size * 2 + 1:
+                    differences.append(''.join(current_diff))
+                    current_diff = []
+
+        # Print differences and surrounding context
+        if differences:
+            print("Differences found in the <body> tags:")
+            for diff in differences:
+                print(diff)
+        else:
+            print("The texts in the <body> tags are the same.")
+    else:
+        print("Error: <body> tag not found in one or both of the soups.")
+
+
 def construct_epub(session, html_content, content_info_json):
     try:
         shutil.rmtree('epub')
@@ -340,6 +395,7 @@ def construct_epub(session, html_content, content_info_json):
     html_content = wrap_elements(html_content)
 
     new_html = test.generate_css_classes(html_content)
+    compare_body_text_with_context(BeautifulSoup(html_content, 'html.parser'), new_html)
 
     download_images(new_html, content_info_json, session, 'epub')
     xhtml_files = build_pages(new_html, 'TITLE', 'epub')

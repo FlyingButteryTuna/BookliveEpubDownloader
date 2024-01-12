@@ -112,3 +112,15 @@ def get_img_b64(session, cid, src, p, content_date):
     else:
         print(f'Failed to fetch img with status code: {response.status_code}')
         return None
+
+
+def get_cover(session, thumbnailURL):
+    url = thumbnailURL + '/thumb_m.png'
+
+    response = session.get(url, headers=_headers)
+
+    if response.status_code == 200:
+        return response.content
+    else:
+        print(f'Failed to fetch cover with status code: {response.status_code}')
+        return None
